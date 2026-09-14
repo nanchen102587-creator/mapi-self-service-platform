@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="MAPI 数据接入中心交互原型" />
+    <title>MAPI 数据接入中心</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">M</div>
+          <div>
+            <strong>MAPI Center</strong>
+            <span>数据接入中心</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="主导航">
+          <button class="nav-item is-active" data-page="dashboard">
+            <span class="nav-icon">⌂</span><span>总看板</span>
+          </button>
+          <button class="nav-item" data-page="account">
+            <span class="nav-icon">＋</span><span>新增账户</span>
+          </button>
+          <button class="nav-item" data-page="channel" id="channelNav">
+            <span class="nav-icon">◇</span><span>新增渠道</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="status-dot"></span>
+          <div><strong>原型演示环境</strong><span>暂未连接真实媒体 API</span></div>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobileMenu" aria-label="打开菜单">☰</button>
+          <div>
+            <h1 id="pageTitle">MAPI 总看板</h1>
+            <p id="pageSubtitle">快速掌握渠道接入规模与同步异常</p>
+          </div>
+          <label class="role-switcher">
+            <span>模拟角色</span>
+            <select id="roleSelect">
+              <option value="normal">普通运营</option>
+              <option value="advanced">高级运营 / 产品</option>
+            </select>
+          </label>
+        </header>
+
+        <main class="content">
+          <section class="page is-visible" data-panel="dashboard">
+            <div class="section-heading">
+              <div><h2>接入概况</h2><p>数据统计截止至今天 09:05</p></div>
+              <button class="secondary-button" id="refreshDashboard">刷新数据</button>
+            </div>
+
+            <div class="metric-grid">
+              <article class="metric-card">
+                <div class="metric-icon purple">渠</div>
+                <div><p>MAPI 拉取渠道总数</p><strong>8</strong><span>已完成基础接入</span></div>
+              </article>
+              <article class="metric-card">
+                <div class="metric-icon blue">账</div>
+                <div><p>同步账户总数</p><strong>36</strong><span>已纳入每日同步任务</span></div>
+              </article>
+              <article class="metric-card">
+                <div class="metric-icon green">✓</div>
+                <div><p>MAPI 正常总数</p><strong>32</strong><span class="success-text">较昨日无变化</span></div>
+              </article>
+              <article class="metric-card danger-card" id="expiredCard" tabindex="0">
+                <div class="metric-icon red">!</div>
+                <div><p>授权过期总数</p><strong>4</strong><span class="danger-text">需要尽快处理</span></div>
+                <div class="tooltip" id="expiredTooltip" role="tooltip">
+                  <strong>授权异常渠道</strong>
+                  <span>百度搜索：2 个账户</span>
+                  <span>Bing：1 个账户</span>
+                  <span>腾讯广告：1 个账户</span>
+                </div>
+              </article>
+            </div>
+
+            <section class="panel-card">
+              <div class="panel-header">
+                <div><h2>异常账户明细</h2><p>优先处理会影响当日同步的账户</p></div>
+                <div class="filters">
+                  <select id="channelFilter" aria-label="筛选渠道">
+                    <option value="all">全部渠道</option>
+                    <option value="百度搜索">百度搜索</option>
+                    <option value="Bing">Bing</option>
+                    <option value="腾讯广告">腾讯广告</option>
+                  </select>
+                  <span class="count-badge">4 条异常</span>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>渠道</th><th>账户 ID</th><th>账户名称</th><th>诊断</th><th>状态</th><th>操作</th></tr></thead>
+                  <tbody id="exceptionTable"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="emptyState">当前筛选条件下没有异常账户</div>
+            </section>
+          </section>
+
+          <section class="page" data-panel="account">
+            <div class="form-layout">
+              <form class="panel-card form-card" id="accountForm">
+                <div class="panel-header"><div><h2>新增同步账户</h2><p>适用于已经完成 MAPI 接入的渠道</p></div><span class="step-badge">运营配置</span></div>
+                <div class="form-body">
+                  <label class="field"><span>渠道 <em>*</em></span><select id="opChannel" required><option value="">请选择渠道</option><option>百度搜索</option><option>360 搜索</option><option>Bing</option><option>腾讯广告</option><option>巨量引擎</option><option>小红书</option></select></label>
+                  <label class="field"><span>账户 ID <em>*</em></span><input id="accountId" required placeholder="请输入媒体广告账户 ID" /><small>系统会校验账户是否存在及是否具备拉数权限</small></label>
+                  <label class="field"><span>起始时间 <em>*</em></span><input id="startDate" required type="date" /><small>填写账户实际开始投放的日期，用于历史数据补拉</small></label>
+                  <label class="field"><span>报表粒度 <em>*</em></span><select id="granularity" required><option value="">请选择报表粒度</option><option>账户</option><option>计划</option><option>单元</option><option>创意</option><option>素材</option><option>关键词</option></select></label>
+                  <fieldset class="field"><legend>指标 <em>*</em></legend><small>指标来自该渠道已配置的 oCPX 上报事件</small><div class="checkbox-grid" id="metricOptions"></div></fieldset>
+                  <div class="process-note"><strong>提交后系统自动执行</strong><span>账户校验 → 权限校验 → 真实试拉 → 字段完整性检查 → 历史补拉 → 每日同步</span></div>
+                  <button class="primary-button" type="submit">校验并新增</button>
+                </div>
+              </form>
+
+              <aside class="guide-card">
+                <h3>填写说明</h3>
+                <ol><li><strong>选择已接入渠道</strong><span>未接入的渠道请由高级运营或产品先完成配置。</span></li><li><strong>填写账户信息</strong><span>账户 ID 必须与媒体后台一致。</span></li><li><strong>选择所需粒度和指标</strong><span>保存后会自动创建定时同步任务。</span></li></ol>
+              </aside>
+            </div>
+            <div class="result-box" id="accountResult" aria-live="polite"></div>
+          </section>
+
+          <section class="page" data-panel="channel">
+            <div class="permission-card" id="permissionCard">
+              <div class="permission-icon">🔒</div><h2>当前角色没有新增渠道权限</h2><p>请将右上角模拟角色切换为「高级运营 / 产品」后继续。</p>
+            </div>
+
+            <div class="form-layout" id="advancedContent">
+              <form class="panel-card form-card" id="channelForm">
+                <div class="panel-header"><div><h2>新增渠道 / 鉴权配置</h2><p>系统会根据渠道展示对应的鉴权字段</p></div><span class="step-badge">高级配置</span></div>
+                <div class="form-body">
+                  <label class="field"><span>渠道 <em>*</em></span><select id="advChannel" required><option value="">请选择渠道</option><option value="baidu">百度搜索</option><option value="360">360 搜索</option><option value="bing">Bing</option><option value="tencent">腾讯广告</option><option value="ocean">巨量引擎</option></select></label>
+                  <label class="field"><span>产品 <em>*</em></span><select id="product" required><option value="">请选择产品</option><option>有道词典</option><option>有道翻译官</option><option>叭哥说</option><option>其他</option></select></label>
+                  <section class="auth-section"><div class="field-title">鉴权信息 <em>*</em></div><p id="authHint">请先选择渠道</p><div id="authFields" class="dynamic-fields"></div></section>
+                  <fieldset class="field"><legend>拉取维度 <em>*</em></legend><div class="radio-grid"><label><input type="radio" name="scope" value="manager" checked /><span><strong>账户管家</strong><small>拉取管家下多个广告账户</small></span></label><label><input type="radio" name="scope" value="single" /><span><strong>单个账户</strong><small>仅拉取一个指定账户</small></span></label></div></fieldset>
+                  <label class="field"><span id="scopeLabel">账户管家 ID <em>*</em></span><input id="scopeId" required placeholder="请输入账户管家 ID" /></label>
+                  <button class="primary-button" type="submit">验证媒体连接</button>
+                </div>
+              </form>
+              <aside class="guide-card"><h3>鉴权安全说明</h3><p>Token、API Key 等敏感信息在正式版本中应通过后端加密存储，前端不得明文回显或写入日志。</p><div class="security-tag">原型仅模拟，不会发送或保存凭证</div></aside>
+            </div>
+            <div class="result-box" id="mediaResult" aria-live="polite"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
